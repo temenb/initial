@@ -36,11 +36,19 @@
         </exec>
     </target>
     
-    <target name="composer" description="Install composer packages including require-dev.">
-        <echo message="composer install" />
+    <target name="docker-compose-composer" description="Install composer packages.">
+        <echo message="docker-compose up composer-install" />
         <exec executable="docker-compose" failonerror="true">
             <arg value="up"/>
             <arg value="composer-install"/>
+        </exec>
+    </target>
+    
+    <target name="composer" description="Install composer packages.">
+        <echo message="composer install" />
+        <exec executable="composer" failonerror="true">
+            <arg value="isntall"/>
+            <arg value="--ignore-platform-reqs"/>
         </exec>
     </target>
     
@@ -58,7 +66,7 @@
         <property name="clean.done" value="true"/>
     </target>
 
-    <target name="full-build" depends="prepare,composer,static-analysis,phpunit,-check-failure"
+    <target name="full-build" depends="prepare,static-analysis,phpunit,-check-failure"
             description="Perform static analysis, run tests, and generate project documentation.">
         <echo message="Built"/>
     </target>
@@ -169,7 +177,7 @@
         <property name="prepare.done" value="true"/>
     </target>
 
-    <target name="quick-build" depends="prepare,composer,lint,phpunit-no-coverage"
+    <target name="quick-build" depends="prepare,lint,phpunit-no-coverage"
             description="Perform lint check and run tests without generating code coverage reports.">
         <echo message="Built"/>
     </target>
