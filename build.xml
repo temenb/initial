@@ -142,6 +142,10 @@
             <arg value="--configuration"/>
             <arg path="${basedir}/phpunit.xml"/>
             <arg path="tests"/>
+            <arg value="--log-junit"/>
+            <arg path="${basedir}/build/coverge/unitreport.xml"/>
+            <arg value="--coverage-clover"/>
+            <arg path="${basedir}/build/coverge/clover.xml"/>
             <env key="XDEBUG_MODE" value="coverage"/>
         </exec>
         <property name="phpunit.done" value="true"/>
