@@ -82,7 +82,7 @@ services:
     composer:
         container_name: initialcode-composer
         build: ./docker/containers/composer
-         command: install --ignore-platform-reqs
+        command: install --ignore-platform-reqs
 #         command: update --ignore-platform-reqs
 #        command: tail -f /etc/hosts
 #        command: cat composer.json
