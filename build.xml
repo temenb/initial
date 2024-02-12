@@ -15,7 +15,7 @@
             command="sh -c 'cd ${remote_dir} &amp;&amp; ant deploy'" />
     </target>
 
-    <target name="deploy" depends="pull,composer-install,migrate">
+    <target name="deploy" depends="pull,composer,migrate">
         <echo message="Deploy latest" />
     </target>
     <target name="pull">
@@ -36,7 +36,7 @@
         </exec>
     </target>
     
-    <target name="composer-install" description="Install composer packages including require-dev.">
+    <target name="composer" description="Install composer packages including require-dev.">
         <echo message="composer install" />
         <exec executable="docker-compose" failonerror="true">
             <arg value="up"/>
@@ -63,7 +63,7 @@
         <property name="clean.done" value="true"/>
     </target>
 
-    <target name="full-build" depends="prepare,composer-install,static-analysis,phpunit,phpdox,-check-failure"
+    <target name="full-build" depends="prepare,composer,static-analysis,phpunit,phpdox,-check-failure"
             description="Perform static analysis, run tests, and generate project documentation.">
         <echo message="Built"/>
     </target>
