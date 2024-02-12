@@ -5,6 +5,8 @@
     <property file="build/properties/common"/>
     <property file="build/properties/env.${environment}"/>
     
+    
+<!--  CD   -->
     <target name="deploy-remote">
         <echo message="Deploying remote" />
         <sshexec 
@@ -53,7 +55,11 @@
     </target>
     
     
-    <!-- By default the tools are managed by Composer in ${basedir}/vendor/bin -->
+    
+    
+    
+<!--  CI   -->
+    
     <property name="pdepend" value="${basedir}/vendor/bin/pdepend"/>
     <property name="phpcs" value="${basedir}/vendor/bin/phpcs"/>
     <property name="phpmd" value="${basedir}/vendor/bin/phpmd"/>
@@ -61,15 +67,39 @@
 
     <target name="clean" unless="clean.done" description="Cleanup build artifacts.">
         <delete dir="${basedir}/build/tmp/coverage"/>
-        <delete dir="${basedir}/build/tmp/logs"/>
+        <delete dir="${basedir}/build/tmp/checkstyle"/>
         <delete dir="${basedir}/build/tmp/pdepend"/>
+        <delete dir="${basedir}/build/tmp/pmd"/>
+        <delete dir="${basedir}/build/tmp/jdepend"/>
         <property name="clean.done" value="true"/>
     </target>
 
+    <target name="prepare" unless="prepare.done" depends="clean" description="Prepare for build.">
+        <mkdir dir="${basedir}/build/tmp/coverage"/>
+        <mkdir dir="${basedir}/build/tmp/checkstyle"/>
+        <mkdir dir="${basedir}/build/tmp/pdepend"/>
+        <mkdir dir="${basedir}/build/tmp/pmd"/>
+        <mkdir dir="${basedir}/build/tmp/jdepend"/>
+        <property name="prepare.done" value="true"/>
+    </target>
+
+    <target name="quick-build" depends="prepare, lint, phpunit-no-coverage"
+            description="Perform lint check and run tests without generating code coverage reports.">
+        <echo message="Built"/>
+    </target>
+
+    <target name="static-analysis" depends="lint, pdepend, phpmd-ci, phpcs-ci"
+            description="Perform static analysis.">
+        <echo message="Done"/>
+    </target>
+    
     <target name="full-build" depends="prepare, static-analysis, phpunit, phpcs, -check-failure"
             description="Perform static analysis, run tests, and generate project documentation.">
         <echo message="Built"/>
     </target>
+
+
+
 
     <target name="lint" unless="lint.done" description="Perform syntax check of PHP sourcecode files.">
         <apply executable="php" failonerror="true" taskname="lint">
@@ -89,7 +119,7 @@
     <target name="pdepend" unless="pdepend.done" depends="prepare"
             description="Calculate software metrics using PHP_Depend and log result in XML format. Intended for usage within a continuous integration environment.">
         <exec executable="${pdepend}" taskname="pdepend">
-            <arg value="--jdepend-xml=${basedir}/build/tmp/logs/jdepend.xml"/>
+            <arg value="--jdepend-xml=${basedir}/build/tmp/jdepend/jdepend.xml"/>
             <arg value="--jdepend-chart=${basedir}/build/tmp/pdepend/dependencies.svg"/>
             <arg value="--overview-pyramid=${basedir}/build/tmp/pdepend/overview-pyramid.svg"/>
             <arg path="${basedir}/app"/>
@@ -97,7 +127,7 @@
         <property name="pdepend.done" value="true"/>
     </target>
 
-    <target name="phpcs" unless="phpcs.done"
+    <target name="phpcs" unless="phpcs.done" 
             description="Find coding standard violations using PHP_CodeSniffer and print human readable output. Intended for usage on the command line before committing.">
         <exec executable="${phpcs}" taskname="phpcs">
             <arg value="--standard=PSR2"/>
@@ -113,7 +143,7 @@
             description="Find coding standard violations using PHP_CodeSniffer and log result in XML format. Intended for usage within a continuous integration environment.">
         <exec executable="${phpcs}" output="/dev/null" taskname="phpcs">
             <arg value="--report=checkstyle"/>
-            <arg value="--report-file=${basedir}/build/tmp/logs/checkstyle.xml"/>
+            <arg value="--report-file=${basedir}/build/tmp/checkstyle/checkstyle.xml"/>
             <arg value="--standard=PSR2"/>
             <arg value="--extensions=php"/>
             <arg value="--ignore=autoload.php"/>
@@ -140,7 +170,7 @@
             <arg value="xml"/>
             <arg path="${basedir}/build/phpmd.xml"/>
             <arg value="--reportfile"/>
-            <arg path="${basedir}/build/tmp/logs/pmd.xml"/>
+            <arg path="${basedir}/build/tmp/pmd/pmd.xml"/>
         </exec>
         <property name="phpmd.done" value="true"/>
     </target>
@@ -151,7 +181,7 @@
             <arg path="${basedir}/phpunit.xml"/>
             <arg path="tests"/>
             <arg value="--log-junit"/>
-            <arg path="${basedir}/build/coverge/unitreport.xml"/>
+            <arg path="${basedir}/build/tmp/coverage/unitreport.xml"/>
             <arg value="--coverage-clover"/>
             <arg path="${basedir}/build/tmp/coverage/clover.xml"/>
             <env key="XDEBUG_MODE" value="coverage"/>
@@ -168,23 +198,6 @@
             <arg value="--no-coverage"/>
         </exec>
         <property name="phpunit.done" value="true"/>
-    </target>
-
-    <target name="prepare" unless="prepare.done" depends="clean" description="Prepare for build.">
-        <mkdir dir="${basedir}/build/tmp/coverage"/>
-        <mkdir dir="${basedir}/build/tmp/logs"/>
-        <mkdir dir="${basedir}/build/tmp/pdepend"/>
-        <property name="prepare.done" value="true"/>
-    </target>
-
-    <target name="quick-build" depends="prepare, lint, phpunit-no-coverage"
-            description="Perform lint check and run tests without generating code coverage reports.">
-        <echo message="Built"/>
-    </target>
-
-    <target name="static-analysis" depends="lint, pdepend, phpmd-ci, phpcs-ci"
-            description="Perform static analysis.">
-        <echo message="Done"/>
     </target>
 
     <target name="-check-failure">
