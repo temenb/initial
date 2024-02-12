@@ -47,7 +47,7 @@
     <target name="composer" description="Install composer packages.">
         <echo message="composer install" />
         <exec executable="composer" failonerror="true">
-            <arg value="isntall"/>
+            <arg value="install"/>
             <arg value="--ignore-platform-reqs"/>
         </exec>
     </target>
