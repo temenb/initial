@@ -52,7 +52,6 @@
     <property name="phpunit" value="${basedir}/vendor/bin/phpunit"/>
 
     <target name="clean" unless="clean.done" description="Cleanup build artifacts.">
-        <delete dir="${basedir}/build/api"/>
         <delete dir="${basedir}/build/coverage"/>
         <delete dir="${basedir}/build/logs"/>
         <delete dir="${basedir}/build/pdepend"/>
@@ -141,7 +140,7 @@
     <target name="phpunit" unless="phpunit.done" depends="prepare" description="Run unit tests with PHPUnit.">
         <exec executable="${phpunit}" resultproperty="result.phpunit" taskname="phpunit">
             <arg value="--configuration"/>
-            <arg path="${basedir}/build/phpunit.xml"/>
+            <arg path="${basedir}/phpunit.xml"/>
             <arg path="tests"/>
         </exec>
         <property name="phpunit.done" value="true"/>
@@ -159,7 +158,6 @@
     </target>
 
     <target name="prepare" unless="prepare.done" depends="clean" description="Prepare for build.">
-        <mkdir dir="${basedir}/build/api"/>
         <mkdir dir="${basedir}/build/coverage"/>
         <mkdir dir="${basedir}/build/logs"/>
         <mkdir dir="${basedir}/build/pdepend"/>
