@@ -47,7 +47,6 @@
     
     <!-- By default the tools are managed by Composer in ${basedir}/vendor/bin -->
     <property name="pdepend" value="${basedir}/vendor/bin/pdepend"/>
-    <property name="phpcpd" value="${basedir}/vendor/bin/phpcpd"/>
     <property name="phpcs" value="${basedir}/vendor/bin/phpcs"/>
     <property name="phpdox" value="${basedir}/vendor/bin/phpdox"/>
     <property name="phpmd" value="${basedir}/vendor/bin/phpmd"/>
@@ -91,24 +90,6 @@
             <arg path="${basedir}/app"/>
         </exec>
         <property name="pdepend.done" value="true"/>
-    </target>
-
-    <target name="phpcpd" unless="phpcpd.done"
-            description="Find duplicate code using PHPCPD and print human readable output. Intended for usage on the command line before committing.">
-        <exec executable="${phpcpd}" taskname="phpcpd">
-            <arg path="${basedir}/app"/>
-        </exec>
-        <property name="phpcpd.done" value="true"/>
-    </target>
-
-    <target name="phpcpd-ci" unless="phpcpd.done" depends="prepare"
-            description="Find duplicate code using PHPCPD and log result in XML format. Intended for usage within a continuous integration environment.">
-        <exec executable="${phpcpd}" taskname="phpcpd">
-            <arg value="--log-pmd"/>
-            <arg path="${basedir}/build/logs/pmd-cpd.xml"/>
-            <arg path="${basedir}/app"/>
-        </exec>
-        <property name="phpcpd.done" value="true"/>
     </target>
 
     <target name="phpcs" unless="phpcs.done"
@@ -199,7 +180,7 @@
         <echo message="Built"/>
     </target>
 
-    <target name="static-analysis" depends="lint,pdepend,phpmd-ci,phpcs-ci,phpcpd-ci"
+    <target name="static-analysis" depends="lint,pdepend,phpmd-ci,phpcs-ci"
             description="Perform static analysis.">
         <echo message="Done"/>
     </target>
