@@ -50,7 +50,6 @@
     <property name="phpcpd" value="${basedir}/vendor/bin/phpcpd"/>
     <property name="phpcs" value="${basedir}/vendor/bin/phpcs"/>
     <property name="phpdox" value="${basedir}/vendor/bin/phpdox"/>
-    <property name="phploc" value="${basedir}/vendor/bin/phploc"/>
     <property name="phpmd" value="${basedir}/vendor/bin/phpmd"/>
     <property name="phpunit" value="${basedir}/vendor/bin/phpunit"/>
 
@@ -138,34 +137,10 @@
         <property name="phpcs.done" value="true"/>
     </target>
 
-    <target name="phpdox" unless="phpdox.done" depends="phploc-ci,phpcs-ci,phpmd-ci"
+    <target name="phpdox" unless="phpdox.done" depends="phpcs-ci,phpmd-ci"
             description="Generate project documentation using phpDox.">
         <exec executable="${phpdox}" dir="${basedir}/build" taskname="phpdox"/>
         <property name="phpdox.done" value="true"/>
-    </target>
-
-    <target name="phploc" unless="phploc.done"
-            description="Measure project size using PHPLOC and print human readable output. Intended for usage on the command line.">
-        <exec executable="${phploc}" taskname="phploc">
-            <arg value="--count-tests"/>
-            <arg path="${basedir}/app"/>
-            <arg path="${basedir}/tests"/>
-        </exec>
-        <property name="phploc.done" value="true"/>
-    </target>
-
-    <target name="phploc-ci" unless="phploc.done" depends="prepare"
-            description="Measure project size using PHPLOC and log result in CSV and XML format. Intended for usage within a continuous integration environment.">
-        <exec executable="${phploc}" taskname="phploc">
-            <arg value="--count-tests"/>
-            <arg value="--log-csv"/>
-            <arg path="${basedir}/build/logs/phploc.csv"/>
-            <arg value="--log-xml"/>
-            <arg path="${basedir}/build/logs/phploc.xml"/>
-            <arg path="${basedir}/app"/>
-            <arg path="${basedir}/tests"/>
-        </exec>
-        <property name="phploc.done" value="true"/>
     </target>
 
     <target name="phpmd" unless="phpmd.done"
@@ -224,7 +199,7 @@
         <echo message="Built"/>
     </target>
 
-    <target name="static-analysis" depends="lint,phploc-ci,pdepend,phpmd-ci,phpcs-ci,phpcpd-ci"
+    <target name="static-analysis" depends="lint,pdepend,phpmd-ci,phpcs-ci,phpcpd-ci"
             description="Perform static analysis.">
         <echo message="Done"/>
     </target>
