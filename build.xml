@@ -5,19 +5,14 @@
     <property file="build/properties/common"/>
     <property file="build/properties/env.${environment}"/>
     
-    <target name="test">
-        <echo>build/properties/env.${environment}</echo>
-        <echo>${prod_host}</echo>
-    </target>
-    
-    <target name="deploy-prod">
-        <echo message="Deploying prod" />
+    <target name="deploy-remote">
+        <echo message="Deploying remote" />
         <sshexec 
-            host="${prod_host}" 
-            username="${prod_username}"
+            host="${remote_host}" 
+            username="${remote_username}"
             trust="true"
-            keyfile="${prod_keyfile}"
-            command="sh -c 'cd ${prod_dir} &amp;&amp; ant deploy'" />
+            keyfile="${remote_keyfile}"
+            command="sh -c 'cd ${remote_dir} &amp;&amp; ant deploy'" />
     </target>
 
     <target name="deploy" depends="pull,composer-install,migrate">
@@ -41,43 +36,13 @@
         </exec>
     </target>
     
-    <target name="composer-install">
+    <target name="composer-install" description="Install composer packages including require-dev.">
         <echo message="composer install" />
         <exec executable="docker-compose" failonerror="true">
             <arg value="up"/>
             <arg value="composer-install"/>
         </exec>
     </target>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     <!-- By default the tools are managed by Composer in ${basedir}/vendor/bin -->
@@ -98,14 +63,7 @@
         <property name="clean.done" value="true"/>
     </target>
 
-    <target name="composer" description="Install composer packages including require-dev.">
-        <exec executable="docker-compose" failonerror="true">
-            <arg value="up"/>
-            <arg value="composer"/>
-        </exec>
-    </target>
-
-    <target name="full-build" depends="prepare,composer,static-analysis,phpunit,phpdox,-check-failure"
+    <target name="full-build" depends="prepare,composer-install,static-analysis,phpunit,phpdox,-check-failure"
             description="Perform static analysis, run tests, and generate project documentation.">
         <echo message="Built"/>
     </target>
