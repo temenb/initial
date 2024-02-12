@@ -142,6 +142,7 @@
             <arg value="--configuration"/>
             <arg path="${basedir}/phpunit.xml"/>
             <arg path="tests"/>
+            <env key="XDEBUG_MODE" value="coverage"/>
         </exec>
         <property name="phpunit.done" value="true"/>
     </target>
