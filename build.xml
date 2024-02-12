@@ -15,7 +15,7 @@
             command="sh -c 'cd ${remote_dir} &amp;&amp; ant deploy'" />
     </target>
 
-    <target name="deploy" depends="pull,composer,migrate">
+    <target name="deploy" depends="pull, composer, migrate">
         <echo message="Deploy latest" />
     </target>
     <target name="pull">
@@ -60,13 +60,11 @@
     <property name="phpunit" value="${basedir}/vendor/bin/phpunit"/>
 
     <target name="clean" unless="clean.done" description="Cleanup build artifacts.">
-        <delete dir="${basedir}/build/coverage"/>
-        <delete dir="${basedir}/build/logs"/>
-        <delete dir="${basedir}/build/pdepend"/>
+        <delete dir="${basedir}/build/tmp/"/>
         <property name="clean.done" value="true"/>
     </target>
 
-    <target name="full-build" depends="prepare,static-analysis,phpunit,-check-failure"
+    <target name="full-build" depends="prepare, static-analysis, phpunit, phpcs, -check-failure"
             description="Perform static analysis, run tests, and generate project documentation.">
         <echo message="Built"/>
     </target>
@@ -89,9 +87,9 @@
     <target name="pdepend" unless="pdepend.done" depends="prepare"
             description="Calculate software metrics using PHP_Depend and log result in XML format. Intended for usage within a continuous integration environment.">
         <exec executable="${pdepend}" taskname="pdepend">
-            <arg value="--jdepend-xml=${basedir}/build/logs/jdepend.xml"/>
-            <arg value="--jdepend-chart=${basedir}/build/pdepend/dependencies.svg"/>
-            <arg value="--overview-pyramid=${basedir}/build/pdepend/overview-pyramid.svg"/>
+            <arg value="--jdepend-xml=${basedir}/build/tmp/logs/jdepend.xml"/>
+            <arg value="--jdepend-chart=${basedir}/build/tmp/pdepend/dependencies.svg"/>
+            <arg value="--overview-pyramid=${basedir}/build/tmp/pdepend/overview-pyramid.svg"/>
             <arg path="${basedir}/app"/>
         </exec>
         <property name="pdepend.done" value="true"/>
@@ -113,7 +111,7 @@
             description="Find coding standard violations using PHP_CodeSniffer and log result in XML format. Intended for usage within a continuous integration environment.">
         <exec executable="${phpcs}" output="/dev/null" taskname="phpcs">
             <arg value="--report=checkstyle"/>
-            <arg value="--report-file=${basedir}/build/logs/checkstyle.xml"/>
+            <arg value="--report-file=${basedir}/build/tmp/logs/checkstyle.xml"/>
             <arg value="--standard=PSR2"/>
             <arg value="--extensions=php"/>
             <arg value="--ignore=autoload.php"/>
@@ -140,7 +138,7 @@
             <arg value="xml"/>
             <arg path="${basedir}/build/phpmd.xml"/>
             <arg value="--reportfile"/>
-            <arg path="${basedir}/build/logs/pmd.xml"/>
+            <arg path="${basedir}/build/tmp/logs/pmd.xml"/>
         </exec>
         <property name="phpmd.done" value="true"/>
     </target>
@@ -153,7 +151,7 @@
             <arg value="--log-junit"/>
             <arg path="${basedir}/build/coverge/unitreport.xml"/>
             <arg value="--coverage-clover"/>
-            <arg path="${basedir}/build/coverge/clover.xml"/>
+            <arg path="${basedir}/build/tmp/coverage/clover.xml"/>
             <env key="XDEBUG_MODE" value="coverage"/>
         </exec>
         <property name="phpunit.done" value="true"/>
@@ -171,18 +169,16 @@
     </target>
 
     <target name="prepare" unless="prepare.done" depends="clean" description="Prepare for build.">
-        <mkdir dir="${basedir}/build/coverage"/>
-        <mkdir dir="${basedir}/build/logs"/>
-        <mkdir dir="${basedir}/build/pdepend"/>
+        <mkdir dir="${basedir}/build/tmp/coverage"/>
         <property name="prepare.done" value="true"/>
     </target>
 
-    <target name="quick-build" depends="prepare,lint,phpunit-no-coverage"
+    <target name="quick-build" depends="prepare, lint, phpunit-no-coverage"
             description="Perform lint check and run tests without generating code coverage reports.">
         <echo message="Built"/>
     </target>
 
-    <target name="static-analysis" depends="lint,pdepend,phpmd-ci,phpcs-ci"
+    <target name="static-analysis" depends="lint, pdepend, phpmd-ci, phpcs-ci"
             description="Perform static analysis.">
         <echo message="Done"/>
     </target>
