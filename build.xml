@@ -48,7 +48,6 @@
     <!-- By default the tools are managed by Composer in ${basedir}/vendor/bin -->
     <property name="pdepend" value="${basedir}/vendor/bin/pdepend"/>
     <property name="phpcs" value="${basedir}/vendor/bin/phpcs"/>
-    <property name="phpdox" value="${basedir}/vendor/bin/phpdox"/>
     <property name="phpmd" value="${basedir}/vendor/bin/phpmd"/>
     <property name="phpunit" value="${basedir}/vendor/bin/phpunit"/>
 
@@ -57,11 +56,10 @@
         <delete dir="${basedir}/build/coverage"/>
         <delete dir="${basedir}/build/logs"/>
         <delete dir="${basedir}/build/pdepend"/>
-        <delete dir="${basedir}/build/phpdox"/>
         <property name="clean.done" value="true"/>
     </target>
 
-    <target name="full-build" depends="prepare,composer,static-analysis,phpunit,phpdox,-check-failure"
+    <target name="full-build" depends="prepare,composer,static-analysis,phpunit,-check-failure"
             description="Perform static analysis, run tests, and generate project documentation.">
         <echo message="Built"/>
     </target>
@@ -118,12 +116,6 @@
         <property name="phpcs.done" value="true"/>
     </target>
 
-    <target name="phpdox" unless="phpdox.done" depends="phpcs-ci,phpmd-ci"
-            description="Generate project documentation using phpDox.">
-        <exec executable="${phpdox}" dir="${basedir}/build" taskname="phpdox"/>
-        <property name="phpdox.done" value="true"/>
-    </target>
-
     <target name="phpmd" unless="phpmd.done"
             description="Perform project mess detection using PHPMD and print human readable output. Intended for usage on the command line before committing.">
         <exec executable="${phpmd}" taskname="phpmd">
@@ -171,7 +163,6 @@
         <mkdir dir="${basedir}/build/coverage"/>
         <mkdir dir="${basedir}/build/logs"/>
         <mkdir dir="${basedir}/build/pdepend"/>
-        <mkdir dir="${basedir}/build/phpdox"/>
         <property name="prepare.done" value="true"/>
     </target>
 
