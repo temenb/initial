@@ -38,6 +38,17 @@
         </exec>
     </target>
     
+    <target name="migrate-phpunit">
+        <echo message="php artisan migrate" />
+        <exec executable="docker" failonerror="true">
+            <arg value="exec"/>
+            <arg value="botan-php"/>
+            <arg value="sh"/>
+            <arg value="-c"/>
+            <arg value="php artisan migrate --database=pgsql_phpunit"/>
+        </exec>
+    </target>
+    
     <target name="docker-compose-composer" description="Install composer packages.">
         <echo message="docker-compose up composer-install" />
         <exec executable="docker-compose" failonerror="true">
@@ -63,7 +74,7 @@
     <property name="pdepend" value="${basedir}/vendor/bin/pdepend"/>
     <property name="phpcs" value="${basedir}/vendor/bin/phpcs"/>
     <property name="phpmd" value="${basedir}/vendor/bin/phpmd"/>
-    <property name="phpunit" value="${basedir}/vendor/bin/phpunit"/>
+    <property name="phpunit" value="vendor/bin/phpunit"/>
 
     <target name="clean" unless="clean.done" description="Cleanup build artifacts.">
         <delete dir="${basedir}/build/reports/coverage"/>
@@ -175,28 +186,25 @@
         <property name="phpmd.done" value="true"/>
     </target>
 
-
-    <target name="phpunit" unless="phpunit.done" depends="prepare" description="Run unit tests with PHPUnit.">
-        <exec executable="${phpunit}" resultproperty="result.phpunit" taskname="phpunit">
-            <arg value="--configuration"/>
-            <arg path="${basedir}/phpunit.xml"/>
-            <arg path="tests"/>
-            <arg value="--log-junit"/>
-            <arg path="${basedir}/build/reports/coverage/unitreport.xml"/>
-            <arg value="--coverage-clover"/>
-            <arg path="${basedir}/build/reports/coverage/clover.xml"/>
-            <env key="XDEBUG_MODE" value="coverage"/>
+    <target name="phpunit" unless="phpunit.done" depends="prepare, migrate-phpunit" description="Run unit tests with PHPUnit.">
+        <exec executable="docker" failonerror="true" resultproperty="result.phpunit" taskname="phpunit">
+            <arg value="exec"/>
+            <arg value="botan-php"/>
+            <arg value="sh"/>
+            <arg value="-c"/>
+            <arg value="${phpunit} --configuration phpunit.xml tests --log-junit build/reports/coverage/unitreport.xml --coverage-clover /build/reports/coverage/clover.xml "/>
         </exec>
         <property name="phpunit.done" value="true"/>
     </target>
 
-    <target name="phpunit-no-coverage" unless="phpunit.done" depends="prepare"
+    <target name="phpunit-no-coverage" unless="phpunit.done" depends="prepare, migrate-phpunit"
             description="Run unit tests with PHPUnit without generating code coverage reports.">
-        <exec executable="${phpunit}" failonerror="true" taskname="phpunit">
-            <arg value="--configuration"/>
-            <arg path="${basedir}/build/phpunit.xml"/>
-            <arg path="tests"/>
-            <arg value="--no-coverage"/>
+        <exec executable="docker" failonerror="true" resultproperty="result.phpunit" taskname="phpunit">
+            <arg value="exec"/>
+            <arg value="botan-php"/>
+            <arg value="sh"/>
+            <arg value="-c"/>
+            <arg value="${phpunit} --configuration phpunit.xml tests --no-coverage "/>
         </exec>
         <property name="phpunit.done" value="true"/>
     </target>
