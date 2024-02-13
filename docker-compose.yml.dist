@@ -102,26 +102,23 @@ services:
             - initialcode
 
     npm:
-        container_name: initialcode-npm
+        container_name: botan-npm
         build: ./docker/containers/npm
         working_dir: /app
+        command: sh -c "npm i && npm run dev -- --host"
 #        command: npm i
 #        command: sh -c "npm i && tail -f /etc/hosts"
 #        command: npm install redis --save
 #        command: npm install node-uuid --save
 #        command: npm i @vitejs/plugin-react-refresh --force
-        command: sh -c "npm i && npm run dev"
 #        command: npm install babel-preset-react --save
-#        ports:
-#            - "80:80"
-#            - "3000:3000"
-#            - "5173:5173"
-#            - "8000:8000"
+        ports:
+           - "5173:5173"
         volumes:
             - ./:/app
             - ./docker/containers/npm/logs:/root/.npm/_logs/
         networks:
-            - initialcode
+            - botan
 
 networks:
     initialcode:
