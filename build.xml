@@ -175,7 +175,9 @@
         <property name="phpmd.done" value="true"/>
     </target>
 
+
     <target name="phpunit" unless="phpunit.done" depends="prepare" description="Run unit tests with PHPUnit.">
+        <echo>${phpunit} --configuration ${basedir}/phpunit.xml tests --log-junit ${basedir}/build/tmp/coverage/unitreport.xml --coverage-clover ${basedir}/build/tmp/coverage/clover.xml XDEBUG_MODE=coverage</echo>
         <exec executable="${phpunit}" resultproperty="result.phpunit" taskname="phpunit">
             <arg value="--configuration"/>
             <arg path="${basedir}/phpunit.xml"/>
