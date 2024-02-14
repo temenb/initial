@@ -4,6 +4,7 @@
     
     <property file="build/properties/common"/>
     <property file="build/properties/env.${environment}"/>
+    <property name="php-container-name" value="initial-php"/>
     
     
 <!--  CD   -->
@@ -17,7 +18,7 @@
             command="sh -c 'cd ${remote_dir} &amp;&amp; ant deploy'" />
     </target>
 
-    <target name="deploy" depends="pull, composer, migrate">
+    <target name="deploy" depends="pull, docker-compose-composer, migrate">
         <echo message="Deploy latest" />
     </target>
     <target name="pull">
@@ -31,21 +32,21 @@
         <echo message="php artisan migrate" />
         <exec executable="docker" failonerror="true">
             <arg value="exec"/>
-            <arg value="botan-php"/>
+            <arg value="${php-container-name}"/>
             <arg value="sh"/>
             <arg value="-c"/>
             <arg value="php artisan migrate"/>
         </exec>
     </target>
-    
+
     <target name="migrate-phpunit">
         <echo message="php artisan migrate" />
         <exec executable="docker" failonerror="true">
             <arg value="exec"/>
-            <arg value="botan-php"/>
+            <arg value="${php-container-name}"/>
             <arg value="sh"/>
             <arg value="-c"/>
-            <arg value="php artisan migrate --database=pgsql_phpunit"/>
+            <arg value="php artisan migrate --database=pgsql_phpunit --seed"/>
         </exec>
     </target>
     
@@ -74,7 +75,7 @@
     <property name="pdepend" value="${basedir}/vendor/bin/pdepend"/>
     <property name="phpcs" value="${basedir}/vendor/bin/phpcs"/>
     <property name="phpmd" value="${basedir}/vendor/bin/phpmd"/>
-    <property name="phpunit" value="vendor/bin/phpunit"/>
+    <property name="phpunit" value="${basedir}/vendor/bin/phpunit"/>
 
     <target name="clean" unless="clean.done" description="Cleanup build artifacts.">
         <delete dir="${basedir}/build/reports/coverage"/>
@@ -94,7 +95,7 @@
         <property name="prepare.done" value="true"/>
     </target>
 
-    <target name="quick-build" depends="prepare, lint, phpunit-no-coverage"
+    <target name="quick-build" depends="composer, prepare, lint, phpunit-no-coverage"
             description="Perform lint check and run tests without generating code coverage reports.">
         <echo message="Built"/>
     </target>
@@ -104,7 +105,7 @@
         <echo message="Done"/>
     </target>
     
-    <target name="full-build" depends="prepare, static-analysis, phpunit, phpcs, -check-failure"
+    <target name="full-build" depends="composer, prepare, static-analysis, phpunit, phpcs, -check-failure"
             description="Perform static analysis, run tests, and generate project documentation.">
         <echo message="Built"/>
     </target>
@@ -187,12 +188,14 @@
     </target>
 
     <target name="phpunit" unless="phpunit.done" depends="prepare, migrate-phpunit" description="Run unit tests with PHPUnit.">
-        <exec executable="docker" failonerror="true" resultproperty="result.phpunit" taskname="phpunit">
-            <arg value="exec"/>
-            <arg value="botan-php"/>
-            <arg value="sh"/>
-            <arg value="-c"/>
-            <arg value="${phpunit} --configuration phpunit.xml tests --log-junit build/reports/coverage/unitreport.xml --coverage-clover /build/reports/coverage/clover.xml "/>
+        <exec executable="${phpunit}" taskname="phpunit" resultproperty="result.phpunit">
+            <arg value="--configuration"/>
+            <arg path="phpunit.xml"/>
+            <arg path="tests"/>
+            <arg value="--log-junit"/>
+            <arg path="${basedir}/build/reports/coverage/unitreport.xml"/>
+            <arg value="--coverage-clover"/>
+            <arg path="${basedir}/build/reports/coverage/clover.xml"/>
         </exec>
         <property name="phpunit.done" value="true"/>
     </target>
@@ -201,7 +204,7 @@
             description="Run unit tests with PHPUnit without generating code coverage reports.">
         <exec executable="docker" failonerror="true" resultproperty="result.phpunit" taskname="phpunit">
             <arg value="exec"/>
-            <arg value="botan-php"/>
+            <arg value="${php-container-name}"/>
             <arg value="sh"/>
             <arg value="-c"/>
             <arg value="${phpunit} --configuration phpunit.xml tests --no-coverage "/>
