@@ -4,7 +4,7 @@
     
     <property file="build/properties/common"/>
     <property file="build/properties/env.${environment}"/>
-    <property name="php-container-name" value="initial-php"/>
+    <property name="php-container-name" value="initialcode-php"/>
     
     
 <!--  CD   -->
